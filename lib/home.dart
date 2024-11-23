@@ -12,66 +12,71 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool isLoading = true;
-  List<Map<String, dynamic>> userList = [];
-  // Map<String, dynamic>? user;
-  void fetchUser() async {
-    final response = await http
-        .get(Uri.parse("https://jsonplaceholder.typicode.com/todos/27"));
+  List<dynamic> postData = [];
+  void fetchPostData() async {
+    const url = 'https://jsonplaceholder.typicode.com/comments?postId=1';
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
     if (response.statusCode == 200) {
       final body = response.body;
       final json = jsonDecode(body);
-      print(json);
       setState(() {
-        // user = json;
-        userList.add(json);
+        postData = json;
+        print(postData.length);
         isLoading = false;
-        print(userList);
       });
+    } else {
+      print("data fetch error${response.statusCode}");
     }
   }
 
   @override
   void initState() {
     // TODO: implement initState
-    // fetchUser();
+    fetchPostData();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      appBar: AppBar(
         backgroundColor: Colors.black,
-        onPressed: () {
-          fetchUser();
-        },
-        child: Text(
-          "click",
-          style: TextStyle(color: Colors.white),
-        ),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : Center(
-              child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (userList.isNotEmpty) ...[
-                  Text(userList[0]['userId'].toString()),
-                  Text(userList[0]['title']),
-                  Text("Completed :  ${userList[0]['completed'].toString()}"),
-                  TextButton(
-                      onPressed: () {
-                        setState(() {
-                          userList.removeAt(0);
-                        });
-                      },
-                      child: Text("delete"))
-                ] else ...[
-                  Text("no data available")
-                ]
-              ],
-            )),
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                itemCount: postData.length,
+                itemBuilder: (context, index) {
+                  final post = postData[index];
+                  return Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Card(
+                      elevation: 7,
+                      shadowColor: Colors.deepPurpleAccent,
+                      color: Colors.lightGreenAccent,
+                      child: ListTile(
+                        title: Text(
+                          post!["name"] ?? "no",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w900),
+                        ),
+                        subtitle: Text(post["body"]),
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.black,
+                          child: Text(
+                            post["id"].toString(),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
     );
   }
 }
