@@ -11,72 +11,69 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  bool isLoading = true;
-  List<dynamic> postData = [];
-  void fetchPostData() async {
-    const url = 'https://jsonplaceholder.typicode.com/comments?postId=1';
+  List<dynamic> product = [];
+  void fetchProduct() async {
+    const url = "https://dummyjson.com/products";
     final uri = Uri.parse(url);
     final response = await http.get(uri);
     if (response.statusCode == 200) {
       final body = response.body;
       final json = jsonDecode(body);
       setState(() {
-        postData = json;
-        print(postData.length);
-        isLoading = false;
+        print(json);
+        setState(() {
+          product = json['products'];
+          print(product);
+        });
       });
-    } else {
-      print("data fetch error${response.statusCode}");
     }
   }
 
   @override
   void initState() {
     // TODO: implement initState
-    fetchPostData();
+    fetchProduct();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
-                itemCount: postData.length,
-                itemBuilder: (context, index) {
-                  final post = postData[index];
-                  return Padding(
-                    padding: const EdgeInsets.all(3.0),
-                    child: Card(
-                      elevation: 7,
-                      shadowColor: Colors.deepPurpleAccent,
-                      color: Colors.lightGreenAccent,
-                      child: ListTile(
-                        title: Text(
-                          post!["name"] ?? "no",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w900),
-                        ),
-                        subtitle: Text(post["body"]),
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.black,
-                          child: Text(
-                            post["id"].toString(),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
+        body: ListView.builder(
+      itemCount: product.length,
+      itemBuilder: (context, index) {
+        final data = product[index];
+        return Card(
+          color: Colors.greenAccent,
+          elevation: 10,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.black,
+                      child: Text(
+                        data['id'].toString(),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
-                  );
-                },
-              ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text(
+                      data?["title"] ?? "gg",
+                      style: TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                  ],
+                ),
+                Text(data["description"] ?? "des"),
+              ],
             ),
-    );
+          ),
+        );
+      },
+    ));
   }
 }
